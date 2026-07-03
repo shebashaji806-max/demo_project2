@@ -2,54 +2,54 @@ import streamlit as st
 import os
 import glob
 
-#Handling moviepy vprsion difference 0(v1.x vs v2.x)
+# Handling MoviePy version differences (v1.x vs v2.x)
 try:
-  from moviepy.editor import ImageClip, concatenate_videoclips, AudioFileClip
+    from moviepy.editor import ImageClip, concatenate_videoclips, AudioFileClip
 except ImportError:
-  from moviepy import ImageClip, concatenate_videoclips, AudioFileClip
+    from moviepy import ImageClip, concatenate_videoclips, AudioFileClip
 import yt_dlp
 
-#--- 1.INTIALIZS STATE ---
+# --- 1. INITIALIZE STATE ---
 if 'audio_path' not in st.session_state:
-  st.session_state['audio_path'] -None
+    st.session_state['audio_path'] = None
 if 'yt_error' in st.session_state:
-  pass
+    pass # Keep it for display logic
 
-
+# --- 2. DEFINE ALL FUNCTIONS ---
 
 def cleanup_temp_files():
-   """Removes temporary files and resets memory."""
-   files = glob.glob("temp*") + ["output video.mp4"]
-   for f in files:
-     try:
-        os.remove(f)
-   except:
-        pass
-     st.session_state['audio_path] -None
-if 'yt-error' in st.session_state:
-    del st.session_state['yt-error']
+    """Removes temporary files and resets memory."""
+    files = glob.glob("temp_*") + ["output_video.mp4"]
+    for f in files:
+        try:
+            os.remove(f)
+        except:
+            pass
+    st.session_state['audio_path'] = None
+    if 'yt_error' in st.session_state:
+        del st.session_state['yt_error']
 
 def download_youtube_audio(url):
-  """Dowmloads only audio from youtube using reliable browser impersonation."""
-audio-opts - {
-  'format': 'bestaudio/best',
-'outtml1': 'temp_audio.%(ext)s',
-  'http_headers':{
-     'User-Agent': 'Mozilla/5.0 (Windows nt 10.0; win64; x64) AppleWebkit/537.36 (KHTML,like Gecko) chrome/122.0.0.0 Safari/537.36',
-      Accept': '*/*,
-      'Referer': 'https://www.google.com/',
-  },
-  'postprocessors' :[{
-    'key' : 'FFmpegExtractAudio',
-    'preferredecode' : 'mp3',
-    'preferredquality' : '192',
-  }],
-}
-with yt_dlp.youtubeDL(audio_opts) as ydl:
-   ydl.download([url])
-return "temp_audio.mp3"
+    """Downloads only audio from YouTube using reliable browser impersonation."""
+    audio_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': 'temp_audio.%(ext)s',
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept': '*/*',
+            'Referer': 'https://www.google.com/',
+        },
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+    with yt_dlp.YoutubeDL(audio_opts) as ydl:
+        ydl.download([url])
+    return "temp_audio.mp3"
 
- def handle_youtube_download(url):
+def handle_youtube_download(url):
     """Callback function to ensure session state persists after button click."""
     try:
         # Clear previous errors
@@ -166,5 +166,5 @@ if st.button("🚀 Create & Play Video", use_container_width=True):
         except Exception as e:
             st.error(f"An error occurred: {e}")
     else:
-        st.warning("Please ensure images are uploaded and audio is 'Loaded and Ready'.")                     
-                  
+        st.warning("Please ensure images are uploaded and audio is 'Loaded and Ready'.")
+        
